@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using StackExchange.Redis;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,9 +13,12 @@ ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(
   });
 
 builder.Services.AddDataProtection()
-    .PersistKeysToStackExchangeRedis(redis)
+   .PersistKeysToStackExchangeRedis(redis)
     .SetApplicationName("Unique");
 
+var db = redis.GetDatabase();
+var pong = await db.PingAsync();
+Console.WriteLine(pong);
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -26,5 +31,19 @@ app.UseAuthorization();
 
 app.MapGet("/", () => "Hello World.. :)");
 app.MapGet("/protected", () => "Secret.. !").RequireAuthorization();
+
+app.MapGet("/login", (HttpContext ctx) =>
+{
+    ctx.SignInAsync(new ClaimsPrincipal(
+        new ClaimsIdentity(
+            new List<Claim>()
+            {
+                new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString())
+            },
+            CookieAuthenticationDefaults.AuthenticationScheme
+            )));
+
+    return "ok";
+});
 
 app.Run();
