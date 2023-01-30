@@ -11,8 +11,8 @@ ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(
   });
 
 builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(@"c:\dataprotection-persistkeys"))
-    //.PersistKeysToStackExchangeRedis(redis)
+    //.PersistKeysToFileSystem(new DirectoryInfo(@"c:\dataprotection-persistkeys"))
+    .PersistKeysToStackExchangeRedis(redis)
     .SetApplicationName("unique");
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
