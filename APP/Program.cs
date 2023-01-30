@@ -11,9 +11,9 @@ ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(
   });
 
 builder.Services.AddDataProtection()
-    .PersistKeysToStackExchangeRedis(redis)
-    .SetApplicationName("Unique");
-
+    .PersistKeysToFileSystem(new DirectoryInfo(@"c:\dataprotection-persistkeys"))
+    //.PersistKeysToStackExchangeRedis(redis)
+    .SetApplicationName("unique");
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -21,7 +21,7 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-app.UseAuthorization();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGet("/", () => "Hello World.. :)");
